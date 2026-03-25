@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Embed Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+      background: #F4F5F9;
+      color: #102738;
+      min-height: 100vh;
+    }
+
+    /* ヘッダー */
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #E2E8EE;
+      padding: 0 40px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-logo {
+      font-size: 18px;
+      font-weight: 800;
+      color: #102738;
+      letter-spacing: -0.3px;
+    }
+
+    .header-logo span {
+      color: #F05B4A;
+    }
+
+    /* ヒーローセクション */
+    .hero {
+      background: #fff;
+      padding: 64px 40px 56px;
+      text-align: center;
+      border-bottom: 1px solid #E2E8EE;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 800;
+      color: #102738;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span {
+      color: #F05B4A;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #4A5B68;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* メインコンテンツ */
+    .main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+
+    /* カード */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #E2E8EE;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #102738;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: #4A5B68;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    textarea {
+      width: 100%;
+      height: 160px;
+      padding: 14px 16px;
+      border: 1px solid #E2E8EE;
+      border-radius: 8px;
+      font-size: 13px;
+      resize: vertical;
+      line-height: 1.7;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: #102738;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #FAFBFC;
+    }
+
+    textarea:focus {
+      border-color: #F05B4A;
+      box-shadow: 0 0 0 3px rgba(240,91,74,0.1);
+      background: #fff;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #8A9BAA;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .hint::before {
+      content: "ⓘ";
+      font-size: 13px;
+    }
+
+    /* ボタン */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: #F05B4A;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.1px;
+    }
+
+    .btn-primary:hover { background: #d94e3e; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled {
+      background: #F4A59D;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #4A5B68;
+      border: 1px solid #E2E8EE;
+      border-radius: 50px;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-secondary:hover {
+      border-color: #102738;
+      color: #102738;
+    }
+
+    .btn-copy {
+      background: #F4F5F9;
+      color: #4A5B68;
+      border: 1px solid #E2E8EE;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-copy:hover {
+      background: #102738;
+      color: #fff;
+      border-color: #102738;
+    }
+
+    .btn-copy.copied {
+      background: #e6f4ea;
+      color: #28a745;
+      border-color: #b8dfbf;
+    }
+
+    /* 出力エリア */
+    #output { display: none; }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .result-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #102738;
+    }
+
+    .result-badge {
+      background: #F05B4A;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 50px;
+      margin-left: 8px;
+    }
+
+    /* タブ */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #E2E8EE;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #8A9BAA;
+      border: none;
+      background: none;
+      transition: color 0.15s;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab:hover { color: #102738; }
+
+    .tab.active {
+      color: #F05B4A;
+      border-bottom-color: #F05B4A;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 個別アイテム */
+    .embed-item {
+      border: 1px solid #E2E8EE;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+
+    .embed-item:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .embed-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #F4F5F9;
+      border-bottom: 1px solid #E2E8EE;
+      gap: 10px;
+    }
+
+    .embed-item-num {
+      background: #F05B4A;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .embed-item-url {
+      font-size: 12px;
+      color: #4A5B68;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .embed-code-block {
+      padding: 14px 16px;
+      background: #fff;
+      font-size: 11.5px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: #465C6F;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* まとめコード */
+    .combined-label {
+      font-size: 13px;
+      color: #4A5B68;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .combined-wrapper {
+      position: relative;
+    }
+
+    .combined-code-block {
+      padding: 16px;
+      background: #F4F5F9;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: #465C6F;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border: 1px solid #E2E8EE;
+      padding-bottom: 48px;
+    }
+
+    .combined-copy-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+    }
+
+    /* エラー */
+    .error-list {
+      background: #FFF5F4;
+      border: 1px solid #FACBC6;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #c0392b;
+      margin-top: 16px;
+    }
+
+    .error-list ul {
+      margin-top: 8px;
+      padding-left: 20px;
+    }
+
+    .error-list li { margin-bottom: 4px; }
+
+    .fetch-error {
+      font-size: 12px;
+      color: #c0392b;
+      padding: 10px 14px;
+      background: #FFF5F4;
+    }
+
+    /* ローディング */
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 0;
+      font-size: 14px;
+      color: #4A5B68;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid #E2E8EE;
+      border-top-color: #F05B4A;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      padding: 32px 20px;
+      font-size: 12px;
+      color: #8A9BAA;
+      border-top: 1px solid #E2E8EE;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-logo">X Embed <span>Generator</span></div>
+  </header>
+
+  <section class="hero">
+    <h1>Xの投稿を<br><span>まとめて埋め込み</span></h1>
+    <p>ポストのURLを貼るだけで、WordPress用の埋め込みコードを一括生成します</p>
+  </section>
+
+  <main class="main">
+
+    <div class="card">
+      <div class="card-title">ポストのURLを入力</div>
+      <div class="card-desc">1行に1件のURLを入力してください。まとめて処理します。</div>
+      <textarea id="urlInput" placeholder="https://x.com/user/status/1234567890
+https://twitter.com/user/status/0987654321
+..."></textarea>
+      <p class="hint">x.com / twitter.com どちらのURLも対応しています</p>
+      <div class="actions">
+        <button class="btn-primary" id="generateBtn" onclick="generate()">埋め込みコードを生成</button>
+        <button class="btn-secondary" onclick="clearAll()">クリア</button>
+      </div>
+    </div>
+
+    <div class="card" id="output">
+      <div class="result-header">
+        <div>
+          <span class="result-title">生成結果</span>
+          <span class="result-badge" id="outputCount">0件</span>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchTab('individual')">個別コード</button>
+        <button class="tab" onclick="switchTab('combined')">まとめてコピー</button>
+      </div>
+
+      <div class="tab-content active" id="tab-individual">
+        <div id="individualList"></div>
+      </div>
+
+      <div class="tab-content" id="tab-combined">
+        <p class="combined-label">全ポストをまとめた1つのコードです。WordPressの「カスタムHTMLブロック」にそのまま貼り付けられます。</p>
+        <div class="combined-wrapper">
+          <div class="combined-code-block" id="combinedCode"></div>
+          <button class="btn-copy combined-copy-btn" id="combinedCopyBtn" onclick="copyCombined()">まとめてコピー</button>
+        </div>
+      </div>
+
+      <div id="errorSection"></div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    X Embed Generator — WordPress用 Xポスト埋め込みコード生成ツール<br>
+    作成者：<a href="https://x.com/kanai_biz" target="_blank" style="color:#F05B4A;text-decoration:none;">かないまさき</a>
+  </footer>
+
+<script>
+  function isValidTweetUrl(url) {
+    return /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/.+\/status\/\d+/i.test(url.trim());
+  }
+
+  function normalizeUrl(url) {
+    return url.trim().replace(/^https?:\/\/(www\.)?x\.com/, 'https://twitter.com');
+  }
+
+  const WIDGET_SCRIPT = `<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"><\/script>`;
+
+  async function fetchOembed(url) {
+    const apiUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}&omit_script=true`;
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.html.trim();
+  }
+
+  async function generate() {
+    const raw = document.getElementById('urlInput').value;
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+    if (lines.length === 0) {
+      alert('URLを入力してください');
+      return;
+    }
+
+    const valid = [];
+    const invalid = [];
+
+    lines.forEach(line => {
+      if (isValidTweetUrl(line)) {
+        valid.push(normalizeUrl(line));
+      } else {
+        invalid.push(line);
+      }
+    });
+
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.textContent = '取得中...';
+
+    const individualList = document.getElementById('individualList');
+    individualList.innerHTML = `<div class="loading"><div class="spinner"></div>oEmbed APIからデータを取得しています（${valid.length}件）...</div>`;
+    document.getElementById('output').style.display = 'block';
+    document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const results = await Promise.all(valid.map(async (url) => {
+      try {
+        const html = await fetchOembed(url);
+        return { url, html, ok: true };
+      } catch (e) {
+        return { url, error: e.message, ok: false };
+      }
+    }));
+
+    btn.disabled = false;
+    btn.textContent = '埋め込みコードを生成';
+
+    individualList.innerHTML = '';
+
+    results.forEach((r, i) => {
+      const item = document.createElement('div');
+      item.className = 'embed-item';
+      if (r.ok) {
+        const code = r.html + '\n' + WIDGET_SCRIPT;
+        item.innerHTML = `
+          <div class="embed-item-header">
+            <div class="embed-item-num">${i + 1}</div>
+            <span class="embed-item-url">${escapeHtml(r.url)}</span>
+            <button class="btn-copy" onclick="copyCode(this, 'code-${i}')">コピー</button>
+          </div>
+          <div class="embed-code-block" id="code-${i}">${escapeHtml(code)}</div>
+        `;
+      } else {
+        item.innerHTML = `
+          <div class="embed-item-header">
+            <div class="embed-item-num">${i + 1}</div>
+            <span class="embed-item-url">${escapeHtml(r.url)}</span>
+          </div>
+          <div class="fetch-error">取得失敗: ${escapeHtml(r.error)}　※ポストが非公開・削除済みの可能性があります</div>
+        `;
+      }
+      individualList.appendChild(item);
+    });
+
+    const successResults = results.filter(r => r.ok);
+    if (successResults.length > 0) {
+      const combined = successResults.map(r => r.html).join('\n') + '\n' + WIDGET_SCRIPT;
+      document.getElementById('combinedCode').textContent = combined;
+    } else {
+      document.getElementById('combinedCode').textContent = '（取得に成功したポストがありません）';
+    }
+
+    const errorSection = document.getElementById('errorSection');
+    if (invalid.length > 0) {
+      errorSection.innerHTML = `
+        <div class="error-list">
+          <strong>⚠ スキップされたURL（${invalid.length}件）</strong>
+          <ul>${invalid.map(u => `<li>${escapeHtml(u)}</li>`).join('')}</ul>
+        </div>
+      `;
+    } else {
+      errorSection.innerHTML = '';
+    }
+
+    document.getElementById('outputCount').textContent = `${successResults.length}件`;
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+    document.getElementById(`tab-${name}`).classList.add('active');
+  }
+
+  function copyCode(btn, id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'コピー済み ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'コピー';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function copyCombined() {
+    const text = document.getElementById('combinedCode').textContent;
+    const btn = document.getElementById('combinedCopyBtn');
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'コピー済み ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'まとめてコピー';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  function clearAll() {
+    document.getElementById('urlInput').value = '';
+    document.getElementById('output').style.display = 'none';
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+</script>
+</body>
+</html>
